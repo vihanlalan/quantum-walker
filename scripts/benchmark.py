@@ -23,7 +23,7 @@ from sklearn.metrics import (
 
 
 def identify_crash_periods(
-    spx: pd.Series,
+    spx,
     drawdown_threshold: float = 0.15,
     peak_window: int = 252,
 ) -> pd.Series:
@@ -35,7 +35,7 @@ def identify_crash_periods(
 
     Parameters
     ----------
-    spx             : S&P 500 close prices
+    spx             : index close prices (Series or DataFrame)
     drawdown_threshold : fraction (e.g. 0.15 = 15% decline)
     peak_window     : rolling window for computing peak
 
@@ -43,6 +43,8 @@ def identify_crash_periods(
     -------
     pd.Series of 0/1 labels aligned to spx.index
     """
+    if isinstance(spx, pd.DataFrame):
+        spx = spx.squeeze()
     rolling_peak = spx.rolling(peak_window, min_periods=1).max()
     drawdown = (spx - rolling_peak) / rolling_peak
 
@@ -138,6 +140,8 @@ def compute_benchmarks(
     dict with all benchmark metrics
     """
     # Align data
+    if isinstance(spx, pd.DataFrame):
+        spx = spx.squeeze()
     common_idx = results.index.intersection(spx.index)
     if len(common_idx) == 0:
         # Use nearest reindex
